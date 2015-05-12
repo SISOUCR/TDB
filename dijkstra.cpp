@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <iostream>
 #include <math.h>
 using namespace std;
@@ -6,12 +5,19 @@ using namespace std;
 void rutafinal(int siz, int *matr, int in, int out, int mintemp, int *minm){ //Este método se utiliza para evaluar los recorridos de 1 tramo, o el último tramo del recorrido
 
     if( *((matr+(siz*in))+out) !=-1){ //En caso de que haya conexión
+        int mein=mintemp;
+        mein+= *((matr+siz*in)+out);//Se suma el costo del tramo al del recorrido final
+        /*cout <<mein<<endl;
+        cout<<"added:";
+        cout <<*((matr+siz*in)+out)  << endl;
+        cout<<"in:";
+        cout << in  << endl;
+        cout<<"out:";
+        cout << out  << endl;*/
 
-        mintemp+= *((matr+siz*in)+out);//Se suma el costo del tramo al del recorrido final
-        //cout <<mintemp<<endl;
-        if(mintemp<*minm){ //Si el costo es menor al de los otro tramos evaluados, este será el nuevo menor
+        if(mein<*minm){ //Si el costo es menor al de los otro tramos evaluados, este será el nuevo menor
 
-            *minm=mintemp;
+            *minm=mein;
             //cout << *minm << endl;
         }
     }
@@ -22,7 +28,16 @@ void rutaintermedia(int siz, int *matr, int in, int out, int mintemp, int *minm,
     //cout << *(matr+1) << endl;
     for(int i=0; i< siz; i++){ //Para evaluar cada una de las filas de la columna de destino
         if(r==2){ //r es el número de nodos del recorrido a evaluar
-            //cout << i << endl;
+            /*cout<<"subr:";
+            cout << r << endl;
+            cout<<"i:";
+            cout << i << endl;*/
+
+            if(rec[i]==1){          //Evalúa qué camino ha sido atravesado para no repetir nodos
+                    //cout<<"nope"<<endl;
+                    goto skip;
+                }
+
             rutafinal(siz, matr, in, out, mintemp, minm);
 
         }else{
@@ -32,26 +47,33 @@ void rutaintermedia(int siz, int *matr, int in, int out, int mintemp, int *minm,
             }
             //cout << "wutt" << endl;
             if(*((matr+siz*i)+out)!=-1 && i!=in){
-                if(recorr[out]==1){          //Evalúa qué camino ha sido atravesado para no repetir nodos
+
+                /*cout<<"subr:";
+                cout << r << endl;
+                cout<<"I:";
+                cout << i << endl;*/
+                if(recorr[i]==1){          //Evalúa qué camino ha sido atravesado para no repetir nodos
+                    //cout<<"nope"<<endl;
                     goto skip;
                 }
 
                 mintemp+=*((matr+siz*i)+out);
                 recorr[out]=1;//marca el nodo para que no vuelva a ser visitado
-                cout<< "rec:";
+                /*cout<< "rec:";
                 cout << recorr[0];
                 cout << recorr[1];
                 cout << recorr[2];
                 cout << recorr[3]<<endl;
                 cout << "suma:";
-                cout << mintemp<<endl;
+                cout << mintemp<<endl;*/
 
                 rutaintermedia(siz, matr, in, i, mintemp, minm, recorr, r-1); //Se va al siguiente posible nodo del recorrido, se disminuye r en 1 para poder llegar a "recorridofinal" a su debido tiempo
+                mintemp-=*((matr+siz*i)+out);
             }
 
         }
         skip:{
-            cout<<"wadup"<<endl;
+
         }
 
     }
@@ -80,11 +102,12 @@ int main(){
 
 
     int siz= sqrt((sizeof matr)/(sizeof matr[0][0]));
-    cout<<siz<<endl;
     int recorrido[siz]; //inicializa una matriz vacía que almacenará los nodos visitados
     for (int f=0; f<siz; f++){
         recorrido[f]=-1; //-1 significa que no está visitado
     }
+    recorrido[io[0]]=1;
+
 
     int minn=0;
 
@@ -101,15 +124,16 @@ int main(){
     int *minm= &minn;
 
     for(int c=siz; c>1; c--){
-    cout<<"r:";
-        cout<<c<<endl;
-
-        rutaintermedia(siz, (int *)matr, io[0], io[1], 0, minm, recorrido, c);
+        //cout<<"r:";
+        //cout<<c<<endl;
+        if(c==2){
+            rutafinal(siz, (int *)matr, io[0], io[1], 0, minm);
+        }else{
+            rutaintermedia(siz, (int *)matr, io[0], io[1], 0, minm, recorrido, c);
+        }
     }
+    cout << "Costo minimo para llegar al nodo:";
     cout << minn << endl;
-    cout << recorrido[0]<<endl;
-                cout << recorrido[1]<<endl;
-                cout << recorrido[2]<<endl;
-                cout << recorrido[3]<<endl;
+
     return 0;
 }
